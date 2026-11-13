@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Show project files
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -Include *.sln,*.vcxproj | Select-Object FullName
+          Write-Host "--- vcxproj content ---"
+          Get-ChildItem -Filter *.vcxproj -Recurse | ForEach-Object {
+            Write-Host "=== $($_.FullName) ==="
+            Get-Content $_.FullName | Select-String "PlatformToolset|WindowsTargetPlatformVersion|LanguageStandard|AdditionalIncludeDirectories|AdditionalLibraryDirectories|AdditionalDependencies"
+          }
+
+      - name: Retarget v142 -> v143
+        shell: pwsh
+        run: |
+          Get-ChildItem -Filter *.vcxproj -Recurse | ForEach-Object {
+            $c = Get-Content $_.FullName -Raw
+            $c = $c -replace '<PlatformToolset>v142</PlatformToolset>', '<PlatformToolset>v143</PlatformToolset>'
+            $c | Set-Content $_.FullName -NoNewline
+          }
+
+      - name: Build (x86 Release)
+        run: msbuild hack.sln /p:Configuration=Release /p:Platform=x86 /m /verbosity:detailed
+        continue-on-error: true
+
+      - name: Build vcxproj directly
+        run: |
+          Get-ChildItem -Filter *.vcxproj -Recurse | ForEach-Object {
+            Write-Host "Building $($_.FullName)"
+            msbuild $_.FullName /p:Configuration=Release /p:Platform=x86 /p:PlatformToolset=v143 /m /verbosity:detailed
+          }
+        continue-on-error: true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hack-build
+          path: |
+            **/*.dll
+            **/*.exe
+          if-no-files-found: warn
