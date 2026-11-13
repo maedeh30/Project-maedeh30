@@ -22,7 +22,7 @@ void APIENTRY Hooked_glBegin(GLenum mode)
 	bool Player = ent && ent->player;
 	bool Weapon = ent && ent->model && (strstr(ent->model->name, "p_") || strstr(ent->model->name, "w_"));
 	bool View_Model = ent && ent->model && strstr(ent->model->name, "v_");
-	
+
 	if (cvar.visual_wall && CheckDrawEngine())
 	{
 		if (Player || Weapon)
@@ -40,7 +40,7 @@ void APIENTRY Hooked_glBegin(GLenum mode)
 	{
 		GLint last_texture;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-		
+
 		for (int i = 0; i < 3; i++)
 			if (last_texture == TexHandsIndex[i]) return;
 	}
@@ -54,14 +54,14 @@ void APIENTRY Hooked_glColor4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat
 		if (cvar.chams_world == 1 || cvar.chams_world == 3)
 			red = chams_world_r, green = chams_world_g, blue = chams_world_b;
 		if (cvar.chams_world == 2)
-			red = chams_world_r* red, green = chams_world_g* green, blue = chams_world_b* blue;
+			red = chams_world_r * red, green = chams_world_g * green, blue = chams_world_b * blue;
 	}
 	if (chams_viewmodel)
 	{
 		if (cvar.chams_view_model == 1 || cvar.chams_view_model == 3)
 			red = chams_viewmodel_r, green = chams_viewmodel_g, blue = chams_viewmodel_b;
 		if (cvar.chams_view_model == 2)
-			red = chams_viewmodel_r* red, green = chams_viewmodel_g* green, blue = chams_viewmodel_b* blue;
+			red = chams_viewmodel_r * red, green = chams_viewmodel_g * green, blue = chams_viewmodel_b * blue;
 	}
 	if (chams_player)
 	{
@@ -86,26 +86,34 @@ void APIENTRY Hooked_glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	{
 		g_Engine.pfnClientCmd("toggleconsole");
 
-		g_Engine.Con_Printf("\n\n\t\t\t\tHello, %s ;)\n", g_Engine.pfnGetCvarString("name"));
-		g_Engine.Con_Printf("\t\t\t\tYou are injected!\n\n");
+		g_Engine.Con_Printf("\n\n");
+		g_Engine.Con_Printf("\t\t\t   .--.--.                         ____                          \n");
+		g_Engine.Con_Printf("\t\t\t  /  /    '.                     ,'  , `.                        \n");
+		g_Engine.Con_Printf("\t\t\t |  :  /`. /                  ,-+-,.' _ |                 ,---,  \n");
+		g_Engine.Con_Printf("\t\t\t ;  |  |--`                ,-+-. ;   , ||             ,-+-. /  | \n");
+		g_Engine.Con_Printf("\t\t\t |  :  ;_      ,--.--.    ,--.'|'   |  || ,--.--.    ,--.'|'   | \n");
+		g_Engine.Con_Printf("\t\t\t  \\  \\    `.  /       \\  |   |  ,', |  |,/       \\  |   |  ,\"' | \n");
+		g_Engine.Con_Printf("\t\t\t   `----.   \\.--.  .-. | |   | /  | |--'.--.  .-. | |   | /  | | \n");
+		g_Engine.Con_Printf("\t\t\t   __ \\  \\  | \\__\\/: . . |   : |  | ,    \\__\\/: . . |   | |  | | \n");
+		g_Engine.Con_Printf("\t\t\t  /  /`--'  / ,\" .--.; | |   : |  |/     ,\" .--.; | |   | |  |/  \n");
+		g_Engine.Con_Printf("\t\t\t '--'.     / /  /  ,.  | |   | |`-'     /  /  ,.  | |   | |--'   \n");
+		g_Engine.Con_Printf("\t\t\t   `--'---' ;  :   .'   \\|   ;/        ;  :   .'   \\|   |/       \n");
+		g_Engine.Con_Printf("\t\t\t            |  ,     .-./'---'         |  ,     .-./'---'        \n");
+		g_Engine.Con_Printf("\t\t\t             `--`---'                   `--`---'                  \n");
+		g_Engine.Con_Printf("\n");
+		g_Engine.Con_Printf("\t\t\t  Injected, %s ;)\n", g_Engine.pfnGetCvarString("name"));
+		g_Engine.Con_Printf("\t\t\t  by Saman\n\n");
+		g_Engine.Con_Printf("\t\t\t  ================================================\n");
+		g_Engine.Con_Printf("\t\t\t   INSERT  - toggle menu\n");
+		g_Engine.Con_Printf("\t\t\t   END     - unload\n");
+		g_Engine.Con_Printf("\t\t\t  ================================================\n\n");
 
-		g_Engine.Con_Printf("\t\t\t\tMultihack by:\n");
-		g_Engine.Con_Printf("\t\t\t\t            [..         [..    [....     [..      \n");
-		g_Engine.Con_Printf("\t\t\t\t             [..       [..   [..    [..  [..      \n");
-		g_Engine.Con_Printf("\t\t\t\t     [..      [..     [..  [..        [..[..      \n");
-		g_Engine.Con_Printf("\t\t\t\t   [.   [..    [..   [..   [..        [..[..      \n");
-		g_Engine.Con_Printf("\t\t\t\t  [..... [..    [.. [..    [..        [..[..      \n");
-		g_Engine.Con_Printf("\t\t\t\t  [.             [....       [..     [.. [..      \n");
-		g_Engine.Con_Printf("\t\t\t\t    [....         [..          [....     [........\n\n");
-
-		g_Engine.Con_Printf("\t\t\t\tSpecial thanks to my friend BloodSharp and oxiKKK <3\n\n");
-		g_Engine.Con_Printf("\t\t\t\tATTENTION! Only WND PROC menu key can be set outside game!\n");
 		if (cvar.gui_key == -1)
-			g_Engine.Con_Printf("\t\t\t\tMenu key is [No key]!\n");
+			g_Engine.Con_Printf("\t\t\tMenu key is [No key]!\n");
 		else if (cvar.gui_key == -2)
-			g_Engine.Con_Printf("\t\t\t\tMenu key is [Press key]!\n");
+			g_Engine.Con_Printf("\t\t\tMenu key is [Press key]!\n");
 		else
-			g_Engine.Con_Printf("\t\t\t\tMenu key is [%s]!\n", GetKeyName((int)cvar.gui_key).c_str());
+			g_Engine.Con_Printf("\t\t\tMenu key is [%s]!\n", GetKeyName((int)cvar.gui_key).c_str());
 
 		FirstFrame = false;
 	}
@@ -113,11 +121,11 @@ void APIENTRY Hooked_glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	if (ChangeKey != cvar.gui_key)
 	{
 		if (cvar.gui_key == -1)
-			g_Engine.Con_Printf("\t\t\t\tMenu key is [No key]!\n");
+			g_Engine.Con_Printf("\t\t\tMenu key is [No key]!\n");
 		else if (cvar.gui_key == -2)
-			g_Engine.Con_Printf("\t\t\t\tMenu key is [Press key]!\n");
+			g_Engine.Con_Printf("\t\t\tMenu key is [Press key]!\n");
 		else
-			g_Engine.Con_Printf("\t\t\t\tMenu key is [%s]!\n", GetKeyName((int)cvar.gui_key).c_str());
+			g_Engine.Con_Printf("\t\t\tMenu key is [%s]!\n", GetKeyName((int)cvar.gui_key).c_str());
 
 		ChangeKey = cvar.gui_key;
 	}
@@ -148,11 +156,11 @@ void HookOpenGL()
 	HMODULE hmOpenGL = GetModuleHandle("opengl32.dll");
 	if (hmOpenGL)
 	{
-		pglBegin = (glBegin_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glBegin"), (LPBYTE)& Hooked_glBegin);
-		pglColor4f = (glColor4f_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glColor4f"), (LPBYTE)& Hooked_glColor4f);
-		pwglSwapBuffers = (wglSwapBuffers_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "wglSwapBuffers"), (LPBYTE)& Hooked_wglSwapBuffers);
-		pglViewport = (glViewport_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glViewport"), (LPBYTE)& Hooked_glViewport);
-		pglClear = (glClear_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glClear"), (LPBYTE)& Hooked_glClear);
-		pglVertex3f = (glVertex3f_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glVertex3f"), (LPBYTE)& Hooked_glVertex3f);
+		pglBegin = (glBegin_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glBegin"), (LPBYTE)&Hooked_glBegin);
+		pglColor4f = (glColor4f_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glColor4f"), (LPBYTE)&Hooked_glColor4f);
+		pwglSwapBuffers = (wglSwapBuffers_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "wglSwapBuffers"), (LPBYTE)&Hooked_wglSwapBuffers);
+		pglViewport = (glViewport_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glViewport"), (LPBYTE)&Hooked_glViewport);
+		pglClear = (glClear_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glClear"), (LPBYTE)&Hooked_glClear);
+		pglVertex3f = (glVertex3f_t)DetourFunction((LPBYTE)GetProcAddress(hmOpenGL, "glVertex3f"), (LPBYTE)&Hooked_glVertex3f);
 	}
 }
