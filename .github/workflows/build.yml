@@ -1,4 +1,4 @@
-name: Build CS 1.6 Complete Cheat
+name: Build Loader Only
 
 on:
   push:
@@ -14,31 +14,35 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Build Cheat DLL (x86 Release)
-        run: msbuild hack.sln /p:Configuration=Release /p:Platform=x86 /p:PlatformToolset=v143 /m /verbosity:minimal
-
+      # بیلد فقط و فقط پروژه‌ی لودر
       - name: Build Loader EXE (x86 Release)
         run: msbuild loader\loader.vcxproj /p:Configuration=Release /p:Platform=x86 /p:PlatformToolset=v143 /m /verbosity:minimal
 
       - name: Prepare Output Folder
+        shell: pwsh
         run: |
           mkdir build_output
           
-          # Find and copy the DLL (since TargetName was Saman, it should be Saman.dll)
-          Get-ChildItem -Path . -Filter "Saman.dll" -Recurse | Select-Object -First 1 | Copy-Item -Destination "build_output\Saman.dll" -ErrorAction SilentlyContinue
-          if (!(Test-Path "build_output\Saman.dll")) {
-            Get-ChildItem -Path . -Filter "hack.dll" -Recurse | Select-Object -First 1 | Copy-Item -Destination "build_output\Saman.dll"
+          # پیدا کردن فایل لودر و کپی آن به پوشه خروجی
+          $loader = Get-ChildItem -Path . -Filter "loader.exe" -Recurse | Select-Object -First 1
+          if ($loader) {
+              Copy-Item -Path $loader.FullName -Destination "build_output\loader.exe"
+          } else {
+              Write-Error "Loader.exe not found after build!"
+              exit 1
           }
-          
-          # Find and copy the Loader EXE
-          Get-ChildItem -Path . -Filter "loader.exe" -Recurse | Select-Object -First 1 | Copy-Item -Destination "build_output\loader.exe"
-          
-          # Copy textures and routes
-          Copy-Item -Path "hack\texture" -Destination "build_output\texture" -Recurse -ErrorAction SilentlyContinue
-          Copy-Item -Path "hack\route" -Destination "build_output\route" -Recurse -ErrorAction SilentlyContinue
+
+          # اگر DLL از قبل در ریپو هست، آن را هم کپی کن تا با لودر در یک پوشه باشد
+          $dll = Get-ChildItem -Path . -Filter "Saman.dll" -Recurse | Select-Object -First 1
+          if (-not $dll) {
+              $dll = Get-ChildItem -Path . -Filter "hack.dll" -Recurse | Select-Object -First 1
+          }
+          if ($dll) {
+              Copy-Item -Path $dll.FullName -Destination "build_output\Saman.dll"
+          }
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CS16-Final-Cheat
+          name: CS16-Loader
           path: build_output\
