@@ -15,7 +15,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build Cheat DLL (x86 Release)
-        run: msbuild hack.sln /p:Configuration=Release /p:Platform=x86 /m /verbosity:minimal
+        run: msbuild hack.sln /p:Configuration=Release /p:Platform=x86 /p:PlatformToolset=v143 /m /verbosity:minimal
 
       - name: Build Loader EXE (x86 Release)
         run: msbuild loader\loader.vcxproj /p:Configuration=Release /p:Platform=x86 /p:PlatformToolset=v143 /m /verbosity:minimal
@@ -24,15 +24,18 @@ jobs:
         run: |
           mkdir build_output
           
-          # 1. Copy the DLL (Rename hack.dll to Saman.dll)
-          copy x86\Release\hack.dll build_output\Saman.dll || copy Release\hack.dll build_output\Saman.dll
+          # Find and copy the DLL (since TargetName was Saman, it should be Saman.dll)
+          Get-ChildItem -Path . -Filter "Saman.dll" -Recurse | Select-Object -First 1 | Copy-Item -Destination "build_output\Saman.dll" -ErrorAction SilentlyContinue
+          if (!(Test-Path "build_output\Saman.dll")) {
+            Get-ChildItem -Path . -Filter "hack.dll" -Recurse | Select-Object -First 1 | Copy-Item -Destination "build_output\Saman.dll"
+          }
           
-          # 2. Copy the Loader EXE (Since OutDir is ..\hack\, the exe is inside hack folder)
-          copy hack\loader.exe build_output\loader.exe || copy x86\Release\loader.exe build_output\loader.exe
+          # Find and copy the Loader EXE
+          Get-ChildItem -Path . -Filter "loader.exe" -Recurse | Select-Object -First 1 | Copy-Item -Destination "build_output\loader.exe"
           
-          # 3. Copy textures and routes
-          xcopy hack\texture build_output\texture /E /I /Y
-          xcopy hack\route build_output\route /E /I /Y
+          # Copy textures and routes
+          Copy-Item -Path "hack\texture" -Destination "build_output\texture" -Recurse -ErrorAction SilentlyContinue
+          Copy-Item -Path "hack\route" -Destination "build_output\route" -Recurse -ErrorAction SilentlyContinue
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
