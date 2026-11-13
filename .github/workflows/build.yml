@@ -1,4 +1,4 @@
-name: Build
+name: Build CS 1.6 Complete Cheat
 
 on:
   push:
@@ -8,47 +8,34 @@ jobs:
   build:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Show project files
-        shell: pwsh
+      - name: Build Cheat DLL (x86 Release)
+        run: msbuild hack.sln /p:Configuration=Release /p:Platform=x86 /m /verbosity:minimal
+
+      - name: Build Loader EXE (x86 Release)
+        run: msbuild loader\loader.vcxproj /p:Configuration=Release /p:Platform=x86 /p:PlatformToolset=v143 /m /verbosity:minimal
+
+      - name: Prepare Output Folder
         run: |
-          Get-ChildItem -Recurse -Include *.sln,*.vcxproj | Select-Object FullName
-          Write-Host "--- vcxproj content ---"
-          Get-ChildItem -Filter *.vcxproj -Recurse | ForEach-Object {
-            Write-Host "=== $($_.FullName) ==="
-            Get-Content $_.FullName | Select-String "PlatformToolset|WindowsTargetPlatformVersion|LanguageStandard|AdditionalIncludeDirectories|AdditionalLibraryDirectories|AdditionalDependencies"
-          }
+          mkdir build_output
+          
+          # 1. Copy the DLL (Rename hack.dll to Saman.dll)
+          copy x86\Release\hack.dll build_output\Saman.dll || copy Release\hack.dll build_output\Saman.dll
+          
+          # 2. Copy the Loader EXE (Since OutDir is ..\hack\, the exe is inside hack folder)
+          copy hack\loader.exe build_output\loader.exe || copy x86\Release\loader.exe build_output\loader.exe
+          
+          # 3. Copy textures and routes
+          xcopy hack\texture build_output\texture /E /I /Y
+          xcopy hack\route build_output\route /E /I /Y
 
-      - name: Retarget v142 -> v143
-        shell: pwsh
-        run: |
-          Get-ChildItem -Filter *.vcxproj -Recurse | ForEach-Object {
-            $c = Get-Content $_.FullName -Raw
-            $c = $c -replace '<PlatformToolset>v142</PlatformToolset>', '<PlatformToolset>v143</PlatformToolset>'
-            $c | Set-Content $_.FullName -NoNewline
-          }
-
-      - name: Build (x86 Release)
-        run: msbuild hack.sln /p:Configuration=Release /p:Platform=x86 /m /verbosity:detailed
-        continue-on-error: true
-
-      - name: Build vcxproj directly
-        run: |
-          Get-ChildItem -Filter *.vcxproj -Recurse | ForEach-Object {
-            Write-Host "Building $($_.FullName)"
-            msbuild $_.FullName /p:Configuration=Release /p:Platform=x86 /p:PlatformToolset=v143 /m /verbosity:detailed
-          }
-        continue-on-error: true
-
-      - name: Upload artifacts
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hack-build
-          path: |
-            **/*.dll
-            **/*.exe
-          if-no-files-found: warn
+          name: CS16-Final-Cheat
+          path: build_output\
